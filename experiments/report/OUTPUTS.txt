@@ -1,0 +1,19 @@
+# Outputs of experiments/report/report.py (relative to OUT): the \input targets of main.tex
+# and supplement.tex (Appendix C of the arXiv version), then the cost table (not input by the paper). Data files of the figures
+# (figures/<fig>/*.dat, *.png) are written beside them and not listed.
+tables/tab_main.tex
+tables/tab_oned_full.tex
+tables/tab_twod_full.tex
+tables/tab_reg_full.tex
+tables/tab_lam_sweep_full.tex
+tables/tab_refine_1d.tex
+tables/tab_refine_2d.tex
+tables/tab_integrator.tex
+tables/tab_tend.tex
+tables/tab_stability.tex
+tables/tab_stability_refine.tex
+figures/fig_hero.tex
+figures/fig_accuracy.tex
+figures/fig_stability.tex
+figures/fig_twod_ops.tex
+tables/tab_cost.tex

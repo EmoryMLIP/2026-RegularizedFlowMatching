@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# the generated paper files (experiments/paper/) are committed; the results live outside
+# the repository (RESULTS_ROOT, docs/REPRODUCE.md); LaTeX builds are not committed
+experiments/paper/build/
+
+# smoke runs and local test outputs (release layout)
+results/smoke/
+results/example/
+
+# the release results (RESULTS_ROOT default, docs/REPRODUCE.md); results/compact may be committed
+/results/*
+!/results/compact/
+/spotcheck_out/

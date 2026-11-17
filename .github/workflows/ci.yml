@@ -1,0 +1,93 @@
+# CI of the paper code. Three jobs, each on Python 3.12 and 3.13:
+# unit tests (< 5 min), the compute scripts in --smoke mode in four groups (each group runs
+# the dependencies it needs and compares every result with tests/fixtures/smoke_reference.json
+# in structure and, within Monte Carlo tolerance, in its outcome metrics; 3-30 min per group
+# on 2 cores, the longest being g1 with the --example run of compare_time; the job uploads its
+# smoke results), and the report regression on the release archive of the results that
+# `make fetch-results` downloads (experiments/report/results_archive.txt).
+# The cvxopt manylinux wheels bundle SuiteSparse (CHOLMOD), so no system packages are needed.
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  VECLIB_MAXIMUM_THREADS: "1"
+  NWORKERS: "2"
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install
+        run: uv sync --frozen --extra cholmod
+      - name: Unit tests
+        run: uv run pytest -m "not slow and not script and not report"
+
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+        group: [g1, g2, g3, g4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install
+        run: uv sync --frozen --extra cholmod
+      - name: Smoke runs of group ${{ matrix.group }}
+        run: uv run pytest -m script -k ${{ matrix.group }} --durations=0 --basetemp=${{ runner.temp }}/pytest
+      - name: Upload the smoke results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-${{ matrix.python-version }}-${{ matrix.group }}
+          path: ${{ runner.temp }}/pytest/results0/smoke/*.npz
+          if-no-files-found: warn
+          retention-days: 14
+
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install
+        run: uv sync --frozen --extra cholmod
+      - name: Fetch the release archive of the results
+        run: |
+          if grep -v '^#' experiments/report/results_archive.txt | grep -q TODO; then
+            echo "::notice title=Report regression not run::experiments/report/results_archive.txt holds a placeholder; the regression against the results is skipped until the archive is published"
+          else
+            make fetch-results
+            echo "SMOOTHFM_REQUIRE_RESULTS=1" >> "$GITHUB_ENV"
+          fi
+      - name: Report regression
+        run: uv run pytest -m report

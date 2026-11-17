@@ -1,0 +1,9 @@
+# The release archive of the results (experiments/report/release_results.py builds it).
+# `make fetch-results` downloads <url>, checks <sha256>, unpacks the archive into
+# RESULTS_ROOT/<name>/ and checks its SHA256SUMS; `make release-report` then writes the
+# tables and figures from RESULTS_ROOT/<name>/paper/results. The environment variables
+# RESULTS_URL (https://..., file://... or a local path) and RESULTS_SHA256 override url and
+# sha256. A url or sha256 containing TODO makes fetch-results stop with a message.
+name 2026-RegularizedFlowMatching-results
+url https://zenodo.org/records/24310380/files/2026-RegularizedFlowMatching-results.tar.gz
+sha256 8f11c841782ce176669e15a3929dc686fe70e12a3e4f231113df19ba8fa4e8f0

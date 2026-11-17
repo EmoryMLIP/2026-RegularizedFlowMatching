@@ -1,0 +1,9 @@
+# Result directories behind the paper's tables and figures (`make paper-report`), relative to
+# RESULTS_ROOT (default results/ in the repository; docs/REPRODUCE.md). Later lines
+# override earlier ones per file name; an absent directory is skipped with a note.
+c2ddb03/results              # 100 of the 126 runs; the lines below add or replace the others
+57a5270-v2/results           # integration_error_<2D target>
+c530cb8-stability/results    # stability_1d[_m256, _m512, _m1024], stability_circle (positive candidates)
+v6/results                   # lam_sweep_<T>_n100, _n3000 (tab_main hold-out constant); stability_circle_l2[_dx005]
+v7/results                   # 2D refinement: controls[_iid]_<T>[_h1, _l2]_m512, controls_iid_<T> at every N for the other 2D targets
+v8/results                   # tend_<2D target> (code 5ceb16c)

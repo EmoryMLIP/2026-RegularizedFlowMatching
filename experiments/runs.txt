@@ -1,0 +1,136 @@
+# The compute stage: every compute run, one per line, after the results it reads.
+# Line format: <result name> <CI group> <dependencies, comma-separated, or -> <script> [args].
+# The Makefile generates its targets from this file: `make compute-<name>` runs one line,
+# `make compute` and `make smoke` run every line in file order, `make smoke-<group>` the lines
+# of one CI group (g1 compare_time, g2 the other 1D runs and gauss8, g3 the circle and
+# checkerboard, g4 spirals; balanced by measured CI time) after the dependencies they need, and
+# `make list` prints the names. Apart from the listed dependencies the invocations are
+# independent, so they can be spread over any number of machines; docs/REPRODUCE.md gives the
+# cost of each.
+
+oned                            g2    -                                             oned
+oned_h1                         g2    -                                             oned --reg h1
+oned_l2                         g2    -                                             oned --reg l2
+gabriel                         g2    oned                                          gabriel
+floors                          g2    -                                             floors
+tend                            g2    oned                                          tend
+integration_error               g2    oned                                          integration_error
+compare_time                    g1    -                                             compare_time
+controls_1d                     g2    -                                             controls --dim 1
+controls_1d_h1                  g2    -                                             controls --dim 1 --reg h1
+controls_1d_l2                  g2    -                                             controls --dim 1 --reg l2
+controls_iid_1d                 g2    controls_1d                                   controls_iid --dim 1
+oned_eval                       g2    oned,gabriel                                  oned_eval
+kde4                            g2    oned_eval                                     kde4
+hero_1d                         g2    oned,oned_eval                                hero_1d
+gabriel_hero_reg                g2    oned,gabriel,oned_h1,oned_l2                  gabriel_hero --regs
+lam_sweep_trimodal              g2    oned                                          lam_sweep --target trimodal --reg h2
+lam_sweep_trimodal_h1           g2    oned_h1                                       lam_sweep --target trimodal --reg h1
+lam_sweep_trimodal_l2           g2    oned_l2                                       lam_sweep --target trimodal --reg l2
+lam_sweep_inhom                 g2    oned                                          lam_sweep --target inhom --reg h2
+lam_sweep_inhom_h1              g2    oned_h1                                       lam_sweep --target inhom --reg h1
+lam_sweep_inhom_l2              g2    oned_l2                                       lam_sweep --target inhom --reg l2
+lam_sweep_trimodal_n100         g2    oned                                          lam_sweep --target trimodal --reg h2 --n 100 --const-only
+lam_sweep_trimodal_n3000        g2    oned                                          lam_sweep --target trimodal --reg h2 --n 3000 --const-only
+lam_sweep_inhom_n100            g2    oned                                          lam_sweep --target inhom --reg h2 --n 100 --const-only
+lam_sweep_inhom_n3000           g2    oned                                          lam_sweep --target inhom --reg h2 --n 3000 --const-only
+stability_1d                    g2    oned,oned_l2                                  stability --dim 1
+stability_1d_m256               g2    oned,oned_l2                                  stability --dim 1 --m 256
+stability_1d_m512               g2    oned,oned_l2                                  stability --dim 1 --m 512
+stability_1d_m1024              g2    oned,oned_l2                                  stability --dim 1 --m 1024
+twod_circle                     g3    -                                             twod --target circle
+twod_circle_h1                  g3    -                                             twod --target circle --reg h1
+twod_circle_l2                  g3    -                                             twod --target circle --reg l2
+kde2d_circle                    g3    -                                             kde2d --target circle
+controls_circle                 g3    -                                             controls --target circle
+controls_circle_h1              g3    -                                             controls --target circle --reg h1
+controls_circle_l2              g3    -                                             controls --target circle --reg l2
+kde4_2d_circle                  g3    twod_circle                                   kde4_2d --target circle
+twod_eval_circle                g3    twod_circle,kde2d_circle                      twod_eval --target circle
+twod_eval_circle_h1             g3    twod_circle_h1                                twod_eval --target circle --reg h1
+twod_eval_circle_l2             g3    twod_circle_l2                                twod_eval --target circle --reg l2
+controls_iid_circle             g3    controls_circle                               controls_iid --target circle
+lam_sweep_circle                g3    twod_circle                                   lam_sweep --target circle --reg h2
+lam_sweep_circle_h1             g3    twod_circle_h1                                lam_sweep --target circle --reg h1
+lam_sweep_circle_l2             g3    twod_circle_l2                                lam_sweep --target circle --reg l2
+lam_sweep_circle_n100           g3    twod_circle                                   lam_sweep --target circle --reg h2 --n 100 --const-only
+lam_sweep_circle_n3000          g3    twod_circle                                   lam_sweep --target circle --reg h2 --n 3000 --const-only
+controls_circle_m512            g3    -                                             controls --target circle --m 512
+controls_circle_h1_m512         g3    -                                             controls --target circle --reg h1 --m 512
+controls_circle_l2_m512         g3    -                                             controls --target circle --reg l2 --m 512
+controls_iid_circle_m512        g3    controls_circle_m512                          controls_iid --target circle --m 512
+em8                             g3    -                                             em8
+stability_circle                g3    twod_circle                                   stability --target circle
+stability_circle_l2             g3    twod_circle_l2                                stability --target circle --reg l2
+stability_circle_l2_dx005       g3    twod_circle_l2                                stability --target circle --reg l2 --grid-dx 0.005
+tend_circle                     g3    twod_circle                                   tend --target circle
+integration_error_circle        g3    twod_circle                                   integration_error --target circle
+twod_checkerboard               g3    -                                             twod --target checkerboard
+twod_checkerboard_h1            g3    -                                             twod --target checkerboard --reg h1
+twod_checkerboard_l2            g3    -                                             twod --target checkerboard --reg l2
+kde2d_checkerboard              g3    -                                             kde2d --target checkerboard
+controls_checkerboard           g3    -                                             controls --target checkerboard
+controls_checkerboard_h1        g3    -                                             controls --target checkerboard --reg h1
+controls_checkerboard_l2        g3    -                                             controls --target checkerboard --reg l2
+kde4_2d_checkerboard            g3    twod_checkerboard                             kde4_2d --target checkerboard
+twod_eval_checkerboard          g3    twod_checkerboard,kde2d_checkerboard          twod_eval --target checkerboard
+twod_eval_checkerboard_h1       g3    twod_checkerboard_h1                          twod_eval --target checkerboard --reg h1
+twod_eval_checkerboard_l2       g3    twod_checkerboard_l2                          twod_eval --target checkerboard --reg l2
+controls_iid_checkerboard       g3    controls_checkerboard                         controls_iid --target checkerboard
+controls_checkerboard_m512      g3    -                                             controls --target checkerboard --m 512
+controls_checkerboard_h1_m512   g3    -                                             controls --target checkerboard --reg h1 --m 512
+controls_checkerboard_l2_m512   g3    -                                             controls --target checkerboard --reg l2 --m 512
+controls_iid_checkerboard_m512  g3    controls_checkerboard_m512                    controls_iid --target checkerboard --m 512
+lam_sweep_checkerboard          g3    twod_checkerboard                             lam_sweep --target checkerboard --reg h2
+lam_sweep_checkerboard_h1       g3    twod_checkerboard_h1                          lam_sweep --target checkerboard --reg h1
+lam_sweep_checkerboard_l2       g3    twod_checkerboard_l2                          lam_sweep --target checkerboard --reg l2
+lam_sweep_checkerboard_n100     g3    twod_checkerboard                             lam_sweep --target checkerboard --reg h2 --n 100 --const-only
+lam_sweep_checkerboard_n3000    g3    twod_checkerboard                             lam_sweep --target checkerboard --reg h2 --n 3000 --const-only
+tend_checkerboard               g3    twod_checkerboard                             tend --target checkerboard
+integration_error_checkerboard  g3    twod_checkerboard                             integration_error --target checkerboard
+twod_spirals                    g4    -                                             twod --target spirals
+twod_spirals_h1                 g4    -                                             twod --target spirals --reg h1
+twod_spirals_l2                 g4    -                                             twod --target spirals --reg l2
+kde2d_spirals                   g4    -                                             kde2d --target spirals
+controls_spirals                g4    -                                             controls --target spirals
+controls_spirals_h1             g4    -                                             controls --target spirals --reg h1
+controls_spirals_l2             g4    -                                             controls --target spirals --reg l2
+kde4_2d_spirals                 g4    twod_spirals                                  kde4_2d --target spirals
+twod_eval_spirals               g4    twod_spirals,kde2d_spirals                    twod_eval --target spirals
+twod_eval_spirals_h1            g4    twod_spirals_h1                               twod_eval --target spirals --reg h1
+twod_eval_spirals_l2            g4    twod_spirals_l2                               twod_eval --target spirals --reg l2
+controls_iid_spirals            g4    controls_spirals                              controls_iid --target spirals
+controls_spirals_m512           g4    -                                             controls --target spirals --m 512
+controls_spirals_h1_m512        g4    -                                             controls --target spirals --reg h1 --m 512
+controls_spirals_l2_m512        g4    -                                             controls --target spirals --reg l2 --m 512
+controls_iid_spirals_m512       g4    controls_spirals_m512                         controls_iid --target spirals --m 512
+lam_sweep_spirals               g4    twod_spirals                                  lam_sweep --target spirals --reg h2
+lam_sweep_spirals_h1            g4    twod_spirals_h1                               lam_sweep --target spirals --reg h1
+lam_sweep_spirals_l2            g4    twod_spirals_l2                               lam_sweep --target spirals --reg l2
+lam_sweep_spirals_n100          g4    twod_spirals                                  lam_sweep --target spirals --reg h2 --n 100 --const-only
+lam_sweep_spirals_n3000         g4    twod_spirals                                  lam_sweep --target spirals --reg h2 --n 3000 --const-only
+tend_spirals                    g4    twod_spirals                                  tend --target spirals
+integration_error_spirals       g4    twod_spirals                                  integration_error --target spirals
+twod_gauss8                     g2    -                                             twod --target gauss8
+twod_gauss8_h1                  g2    -                                             twod --target gauss8 --reg h1
+twod_gauss8_l2                  g2    -                                             twod --target gauss8 --reg l2
+kde2d_gauss8                    g2    -                                             kde2d --target gauss8
+controls_gauss8                 g2    -                                             controls --target gauss8
+controls_gauss8_h1              g2    -                                             controls --target gauss8 --reg h1
+controls_gauss8_l2              g2    -                                             controls --target gauss8 --reg l2
+kde4_2d_gauss8                  g2    twod_gauss8                                   kde4_2d --target gauss8
+twod_eval_gauss8                g2    twod_gauss8,kde2d_gauss8                      twod_eval --target gauss8
+twod_eval_gauss8_h1             g2    twod_gauss8_h1                                twod_eval --target gauss8 --reg h1
+twod_eval_gauss8_l2             g2    twod_gauss8_l2                                twod_eval --target gauss8 --reg l2
+controls_iid_gauss8             g2    controls_gauss8                               controls_iid --target gauss8
+controls_gauss8_m512            g2    -                                             controls --target gauss8 --m 512
+controls_gauss8_h1_m512         g2    -                                             controls --target gauss8 --reg h1 --m 512
+controls_gauss8_l2_m512         g2    -                                             controls --target gauss8 --reg l2 --m 512
+controls_iid_gauss8_m512        g2    controls_gauss8_m512                          controls_iid --target gauss8 --m 512
+lam_sweep_gauss8                g2    twod_gauss8                                   lam_sweep --target gauss8 --reg h2
+lam_sweep_gauss8_h1             g2    twod_gauss8_h1                                lam_sweep --target gauss8 --reg h1
+lam_sweep_gauss8_l2             g2    twod_gauss8_l2                                lam_sweep --target gauss8 --reg l2
+lam_sweep_gauss8_n100           g2    twod_gauss8                                   lam_sweep --target gauss8 --reg h2 --n 100 --const-only
+lam_sweep_gauss8_n3000          g2    twod_gauss8                                   lam_sweep --target gauss8 --reg h2 --n 3000 --const-only
+tend_gauss8                     g2    twod_gauss8                                   tend --target gauss8
+integration_error_gauss8        g2    twod_gauss8                                   integration_error --target gauss8
